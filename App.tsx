@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
@@ -24,43 +25,80 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    flex: 1
   };
+
+  async function onlyCheckPermissionIOS() {
+    check(PERMISSIONS.IOS.LOCATION_ALWAYS)
+      .then(async (result) => {
+
+        switch (result) {
+          case RESULTS.UNAVAILABLE:
+            console.log('This feature is not available (on this device / in this context)');
+            break;
+          case RESULTS.DENIED:
+            console.log('HASIL NYAAA:', result);
+            requestPermissionIOS()
+            // console.log('The permission has not been requested / is denied but requestable');
+            break;
+          case RESULTS.LIMITED:
+            console.log('The permission is limited: some actions are possible');
+            break;
+          case RESULTS.GRANTED:
+            console.log('The permission is granted');
+            break;
+          case RESULTS.BLOCKED:
+            console.log('HASIL NYAAA:', result);
+            // console.log('The permission is denied and not requestable anymore');
+            break;
+        }
+      })
+      .catch((error) => {
+        // …
+        console.log('Error CUk:', error);
+        
+      });
+  }
+
+
+  function requestPermissionIOS() {
+    request(PERMISSIONS.IOS.LOCATION_ALWAYS)
+      .then((result) => {
+        console.log('requestPermissionIOS______:', result);
+
+        // switch (result) {
+        //   case RESULTS.UNAVAILABLE:
+        //     console.log('This feature is not available (on this device / in this context)');
+        //     break;
+        //   case RESULTS.DENIED:
+        //     console.log('The permission has not been requested / is denied but requestable');
+        //     break;
+        //   case RESULTS.LIMITED:
+        //     console.log('The permission is limited: some actions are possible');
+        //     break;
+        //   case RESULTS.GRANTED:
+        //     console.log('The permission is granted');
+        //     break;
+        //   case RESULTS.BLOCKED:
+        //     console.log('The permission is denied and not requestable anymore');
+        //     break;
+        // }
+      })
+      .catch((error) => {
+        // …
+      });
+  }
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -68,30 +106,21 @@ function App(): React.JSX.Element {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
+      <TouchableOpacity onPress={requestPermissionIOS} style={{ width: 300, height: 100, backgroundColor: 'white', borderColor: 'white' }}>
+        <Text>
+          Cek Permission Location
+        </Text>
+      </TouchableOpacity>
+      {/* <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
         <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+        <TouchableOpacity>
+          <Text>
+            Cek Permission Location
+          </Text>
+        </TouchableOpacity>
+      </ScrollView> */}
     </SafeAreaView>
   );
 }
